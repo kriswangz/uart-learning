@@ -73,7 +73,7 @@ always @(posedge clk or posedge rst)
 always @(posedge clk or posedge rst)
     if (rst)
         // reset
-        bps_clk <= 1'b1;
+        bps_clk <= 1'b0;
     else if (cnt == 'd1)
         bps_clk <= 1'b1;
     else 
