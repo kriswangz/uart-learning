@@ -11,22 +11,19 @@
 module uart_tx#(
     parameter   CLK_FREQ    =   50_000_000, //hz
                 BAUD_RATE   =   9600,       //9600,19200,38400,57600,115200,230400,460800,921600
-                PARITY      =   "None",     // None, Even, Odd
+                PARITY_MODE =   "None",     // None, Even, Odd
                 FRAME_WD    =   8           //5,6,7,8
     )
 (
     input                       clk,
-    input                       bps_clk,
+    input                       rst,
+    input                       bps_clk, //bps_clk is just a pulse signal
     input                       send,
     input   [FRAME_WD-1 : 0]    din,
-    output                      tx_done,
-    output                      busy,
-    output                      tx
+    output  reg                 tx_done,
+    output  reg                 busy,
+    output  reg                 tx
     );
-
-reg busy;
-reg tx_done;
-reg tx;
 
 localparam  IDLE    =   6'b00_0000,
             READY   =   6'b00_0001,
@@ -76,7 +73,7 @@ always @(*)
         IDLE    :       nstate = send           ? READY : IDLE;
         READY   :       nstate = (bps_clk == 1) ? START : READY;
         START   :       nstate = (bps_clk == 1) ? SHIFT : START;
-        SHIFT   :       nstate = (bps_clk == 1 && cnt == FRAME_WD -1) PARITY : SHIFT;
+        SHIFT   :       nstate = (bps_clk == 1 && cnt == FRAME_WD -1) ? PARITY : SHIFT;
         PARITY  :       nstate = (bps_clk == 1) ? STOP  : PARITY;
         STOP    :       nstate = (bps_clk == 1) ? DONE  : STOP;
         DONE    :       nstate = IDLE;
@@ -115,7 +112,7 @@ always @(posedge clk or posedge rst)
             SHIFT   :   begin
                             if(bps_clk == 1) begin
                             //LSB first. we can use generate command so that we can use MSB first
-                                data_reg    <=  {1'b0, data_reg{FRAME_WD-1:1}};
+                                data_reg    <=  {1'b0, data_reg[FRAME_WD-1:1]};
                                 tx          <=  data_reg[0];
                             end
                                 data_reg    <=  data_reg;
