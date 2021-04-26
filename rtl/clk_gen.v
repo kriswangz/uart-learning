@@ -9,8 +9,8 @@
 */
 
 module clk_gen#(
-    parameter   CLK_FREQ=50_000_000,
-                BAUD_RATE=9600
+    parameter   CLK_FREQ=50_000_000, //clk freqence
+                BAUD_RATE=9600       //9600,19200,38400,57600,115200,230400,460800,921600...
     )
 (
     input   clk,
