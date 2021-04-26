@@ -14,12 +14,10 @@ module clk_gen#(
     )
 (
     input   clk,
-    input   rst_n,
+    input   rst,
     input   uart_en,
-    output  bps_clk
+    output reg bps_clk
     );
-
-reg     bps_clk;
 
 localparam  BPS_CNT =    CLK_FREQ/BAUD_RATE-1;
 localparam  BPS_WD  =    clogb2(BPS_CNT);
@@ -51,8 +49,8 @@ always @(posedge clk or posedge rst)
 //FSM-2
 always @(*) 
     case(cstate)
-        START: nstate =  uart_en ? START: STOP;
-        STOP : nstate = (!uart_en) STOP : START;
+        START: nstate =  uart_en ?  START: STOP;
+        STOP : nstate = (!uart_en)? STOP : START;
         default:  nstate = STOP;
     endcase
 
